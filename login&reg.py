@@ -15,19 +15,33 @@ def reg():
     conn.commit()
     conn.close()
 def login():
-    a=''
-    uname = input('Enter your username : ')
-    pword = input('Enter your password : ')
-    conn = sqlite3.connect('users.db')
-    c = conn.cursor()
-    c.execute('''SELECT pword FROM login WHERE uname = ?''',(uname,))
-    real_pword = c.fetchall()
-    conn.commit()
-    conn.close()
-    if pword == real_pword[0][0]:
-        print('Welcome back ' + uname)
-    else:
-        print('Incorrect password')
+    attempt = True
+    while attempt == True:
+        uname = input('Enter your username : ')
+        pword = input('Enter your password : ')
+        if uname == '' or pword == '':
+            print('you failed to enter text into one of the text boxes...... exitting')
+            break
+        conn = sqlite3.connect('users.db')
+        c = conn.cursor()
+        c.execute('''SELECT pword FROM login WHERE uname = ?''',(uname,))
+        real_pword = c.fetchall()
+        conn.commit()
+        conn.close()
+        try:
+            if pword == real_pword[0][0]:
+                print('Welcome back ' + uname)
+                attempt = False
+            else:
+                print('Incorrect password')
+                again = input('Would you like to retry? (y)/(n)')
+                if again == 'y':
+                    pass
+                else:
+                    attempt = False
+        except IndexError:
+            print('user not found')
+            break
 if __name__ == "__main__":
     wtd = input('Create database (c), Register (r), login (l)')
     if wtd == "c":
