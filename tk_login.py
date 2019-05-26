@@ -1,5 +1,9 @@
 import tkinter as tk
 import sqlite3
+from tkinter import messagebox
+import sys
+not_allowed = ';#-'
+broken = False
 class main:
     def __init__(self,master):
         self.master = master
@@ -29,11 +33,15 @@ class main:
 
 class login:
     def __init__(self,master):
+        entryText = tk.StringVar()
+        entryTextPass = tk.StringVar()
         self.master = master
         self.frame = tk.Frame(self.master)
-        self.button1 = tk.Button(self.frame,text ='test', width = 50, command = self.login)
-        self.e1 = tk.Entry(self.master)
-        self.e2 = tk.Entry(self.master)
+        self.button1 = tk.Button(self.frame,text ='Login', width = 50, command = self.login)
+        self.e1 = tk.Entry(self.master, textvariable=entryText)
+        entryText.set("Username")
+        self.e2 = tk.Entry(self.master, textvariable = entryTextPass)
+        entryTextPass.set("Password")
         self.e1.pack()
         self.e2.pack()
         self.button1.pack()
@@ -45,6 +53,11 @@ class login:
         while attempt == True:
             uname = self.e1.get()
             pword = self.e2.get()
+            tot = uname + pword
+            for i in tot:
+                if i in not_allowed:
+                    messagebox.showerror("Error", "SQL injection detected")
+                    sys.exit()
             if uname == '' or pword == '':
                 print('you failed to enter text into one of the text boxes...... exitting')
                 break
@@ -70,24 +83,39 @@ class login:
                 break
 class reg:
     def __init__(self,master):
+        entryText = tk.StringVar()
+        entryTextPass = tk.StringVar()
         self.master = master
         self.frame = tk.Frame(self.master)
         self.reg_button = tk.Button(self.frame, text='Register', width = 50, command = self.reg)
         self.reg_button.pack()
-        self.e1 = tk.Entry(self.master)
-        self.e2 = tk.Entry(self.master)
+        self.e1 = tk.Entry(self.master, textvariable=entryText)
+        entryText.set("Username")
+        self.e2 = tk.Entry(self.master, textvariable = entryTextPass)
+        entryTextPass.set("Password")
         self.e1.pack()
         self.e2.pack()
         self.frame.pack()
     def reg(self):
+        broken = False
         uname = self.e1.get()
         pword = self.e2.get()
-        conn = sqlite3.connect('users.db')
-        c = conn.cursor()
-        params = (uname,pword)
-        c.execute('INSERT INTO login VALUES (null,?,?)',params)
-        conn.commit()
-        conn.close()
+        tot = str(self.e1.get()) + str(self.e2.get())
+        print(tot)
+        for i in tot:
+            if i in not_allowed:
+                broken = True
+        if broken == False:
+            print('not broken')
+            conn = sqlite3.connect('users.db')
+            c = conn.cursor()
+            params = (uname,pword)
+            c.execute('INSERT INTO login VALUES (null,?,?)',params)
+            conn.commit()
+            conn.close()
+        else:
+            messagebox.showerror("Error", "SQL injection detected")
+
 if __name__ == '__main__':
     root = tk.Tk()
     app = main(root)
